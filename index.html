@@ -32,37 +32,39 @@
                 linear-gradient(180deg, #edf1eb 0%, #f7f9f6 220px, var(--bg) 100%);
             color: var(--text);
             margin: 0;
+            height: 2000px;
+            overflow-y: scroll;
+            overflow-x: hidden;
         }
 
         .site-header {
             background: linear-gradient(90deg, #171c20, #252d33);
             color: #ffffff;
-            border-bottom: 3px solid var(--primary);
+            border-bottom: 2px solid var(--primary);
         }
 
         .site-header-inner {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 16px 24px;
+            padding: 10px 24px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 20px;
+            gap: 30px;
+            flex-wrap: wrap;
         }
 
         .brand-mark {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 10px;
         }
 
         .brand-accent {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
-            position: relative;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            background: var(--primary);
+            flex-shrink: 0;
         }
 
         .brand-accent::before,
@@ -74,91 +76,68 @@
         }
 
         .brand-accent::before {
-            width: 20px;
-            height: 5px;
-            top: 19px;
-            left: 12px;
+            width: 12px;
+            height: 3px;
+            top: 11px;
+            left: 7px;
         }
 
         .brand-accent::after {
-            width: 5px;
-            height: 20px;
-            top: 12px;
-            left: 19px;
+            width: 3px;
+            height: 12px;
+            top: 7px;
+            left: 11px;
         }
 
         .brand-copy {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 0;
         }
 
         .brand-kicker {
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.7);
+            display: none;
         }
 
         .brand-title {
-            font-size: 1.05rem;
-            font-weight: 700;
+            font-size: 0.95rem;
+            font-weight: 600;
             letter-spacing: 0.01em;
         }
 
         .brand-summary {
-            color: rgba(255,255,255,0.72);
-            font-size: 0.9rem;
-            text-align: right;
+            display: none;
         }
 
         .page-shell {
-            padding: 26px 24px 42px;
+            padding: 0 24px 28px;
         }
 
         .hero {
             max-width: 1400px;
-            margin: 0 auto 24px;
-            padding: 34px;
-            border-radius: 28px;
-            background:
-                linear-gradient(135deg, rgba(22, 27, 31, 0.97), rgba(32, 40, 45, 0.94)),
-                radial-gradient(circle at right, rgba(135, 188, 36, 0.18), transparent 35%);
+            margin: 0 auto 16px;
+            padding: 12px 0;
+            border-radius: 0;
+            background: transparent;
             color: #ffffff;
-            box-shadow: 0 24px 60px rgba(20, 25, 21, 0.16);
+            box-shadow: none;
             display: grid;
-            grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.9fr);
-            gap: 26px;
-            overflow: hidden;
+            grid-template-columns: 1fr;
+            gap: 0;
+            overflow: visible;
             position: relative;
         }
 
         .hero::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(120deg, transparent 58%, rgba(135, 188, 36, 0.12) 100%);
-            pointer-events: none;
+            display: none;
+        }
+
+        .hero > div:first-child {
+            display: none;
         }
 
         .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.78rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: var(--primary);
-            margin-bottom: 14px;
-        }
-
-        .eyebrow::before {
-            content: "";
-            width: 28px;
-            height: 2px;
-            background: currentColor;
+            display: none;
         }
 
         h1 {
@@ -169,76 +148,60 @@
         }
 
         .hero-copy {
-            max-width: 760px;
-            margin: 0;
-            font-size: 1rem;
-            line-height: 1.7;
-            color: rgba(255,255,255,0.82);
+            display: none;
         }
 
         .hero-highlights {
-            list-style: none;
-            padding: 0;
-            margin: 22px 0 0;
-            display: grid;
-            gap: 10px;
+            display: none;
         }
 
         .hero-highlights li {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: rgba(255,255,255,0.9);
+            display: none;
         }
 
         .hero-highlights li::before {
-            content: "";
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            background: var(--primary);
-            box-shadow: 0 0 0 5px rgba(135, 188, 36, 0.16);
-            flex-shrink: 0;
+            display: none;
         }
 
         .hero-stat-grid {
             display: grid;
-            gap: 14px;
-            align-self: stretch;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             position: relative;
             z-index: 1;
+            margin: 0;
         }
 
         .stat-card {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 20px;
-            padding: 18px 18px 16px;
+            background: rgba(135, 188, 36, 0.1);
+            border: 1px solid rgba(135, 188, 36, 0.3);
+            border-radius: 10px;
+            padding: 10px 12px;
             backdrop-filter: blur(8px);
-            min-height: 108px;
+            min-height: auto;
         }
 
         .stat-label {
             display: block;
-            font-size: 0.78rem;
+            font-size: 0.65rem;
             font-weight: 700;
             letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.62);
-            margin-bottom: 10px;
+            color: rgba(135, 188, 36, 0.8);
+            margin-bottom: 4px;
         }
 
         .stat-value {
             display: block;
-            font-size: 1.85rem;
+            font-size: 1.2rem;
             font-weight: 700;
             line-height: 1.1;
-            margin-bottom: 8px;
+            margin-bottom: 0;
+            color: #ffffff;
         }
 
         .stat-caption {
-            color: rgba(255,255,255,0.72);
-            font-size: 0.92rem;
+            display: none;
         }
 
         .container {
@@ -316,6 +279,7 @@
         .status-loading { background-color: #fff4d4; color: #8b5c00; border-color: #f2d690; }
         .status-success { background-color: var(--primary-soft); color: #486e12; border-color: #c9dd9e; }
         .status-error { background-color: #fde7e7; color: #a12e2e; border-color: #efc2c2; }
+        .status-neutral { background-color: #f0f0f0; color: #555555; border-color: #d5d5d5; }
 
         .form-grid {
             display: grid;
@@ -385,6 +349,10 @@
             filter: brightness(1.03);
             transform: translateY(-1px);
             box-shadow: 0 14px 28px rgba(109, 153, 29, 0.22);
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
         }
 
         .btn-secondary {
@@ -530,34 +498,52 @@
                 text-align: left;
             }
 
-            .hero {
+            .comparison-selectors {
                 grid-template-columns: 1fr;
-                padding: 28px;
             }
 
-            .comparison-selectors {
+            .hero-stat-grid {
                 grid-template-columns: 1fr;
             }
         }
 
         @media (max-width: 640px) {
             .page-shell {
-                padding: 18px 14px 28px;
+                padding: 0 12px 20px;
             }
 
             .site-header-inner {
-                padding: 14px;
+                padding: 8px 12px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
             }
 
-            .card,
-            .hero {
-                padding: 20px;
-                border-radius: 20px;
+            .card {
+                padding: 16px;
+                border-radius: 16px;
             }
 
             .file-controls .btn {
                 width: 100%;
                 min-width: 0;
+            }
+
+            .hero-stat-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .stat-card {
+                padding: 8px 10px;
+            }
+
+            .stat-value {
+                font-size: 1rem;
+            }
+
+            .stat-label {
+                font-size: 0.6rem;
             }
         }
     </style>
@@ -616,10 +602,10 @@
             <div>
                 <div class="section-kicker">Database operations</div>
                 <h2>Load, validate, and export sensor data</h2>
-                <p class="card-copy">Keep the page focused on workbook-driven data entry, fast refresh cycles, and easy local export.</p>
+                <p class="card-copy">Click 'Manual Load' to browse and select an Excel file. The browser will open in your Documents folder by default.</p>
             </div>
         </div>
-        <div id="statusBadge" class="status-badge status-loading">⌛ Auto-loading 'Sensor_Database.xlsx'...</div>
+        <div id="statusBadge" class="status-badge status-neutral">📂 Ready to load data</div>
         
         <div class="file-controls">
             <input type="file" id="excelFile" accept=".xlsx, .xls" style="display: none;" onchange="importFromExcel(event)">
@@ -768,32 +754,12 @@
     let colTech = "";
     let colModel = "";
 
-    // Auto-run on page load
+    // Page load - just show ready state
     window.addEventListener('DOMContentLoaded', () => {
-        autoLoadDefaultExcel();
-    });
-
-    // Auto-load Excel from local folder
-    async function autoLoadDefaultExcel() {
         const badge = document.getElementById('statusBadge');
-        try {
-            const response = await fetch(DEFAULT_EXCEL_FILENAME);
-            if (!response.ok) throw new Error("File not found or access blocked.");
-            
-            const arrayBuffer = await response.arrayBuffer();
-            parseExcelData(arrayBuffer);
-            
-            badge.className = "status-badge status-success";
-            badge.innerText = `✅ Auto-loaded '${DEFAULT_EXCEL_FILENAME}' successfully!`;
-        } catch (err) {
-            console.warn("Auto-load failed:", err);
-            badge.className = "status-badge status-error";
-            badge.innerText = `⚠️ Could not auto-load '${DEFAULT_EXCEL_FILENAME}'. Please use 'Manual Load'.`;
-            
-            document.getElementById('comparisonBody').innerHTML = 
-                '<tr><td colspan="3" style="text-align:center;">Please upload an Excel database file manually.</td></tr>';
-        }
-    }
+        badge.className = "status-badge status-neutral";
+        badge.innerText = `📂 Use the 'Manual Load' button below to select an Excel file from your computer.`;
+    });
 
     // Process raw ArrayBuffer into Application state
     function parseExcelData(arrayBuffer) {
