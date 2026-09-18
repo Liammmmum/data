@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Sensor Database & Comparator</title>
+    <!-- SheetJS CDN for reading and writing Excel files -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #87bc24;
+            --primary-dark: #6d991d;
+            --primary-soft: #edf5dc;
+            --bg: #eff2ed;
+            --card-bg: #ffffff;
+            --card-muted: #f5f8f2;
+            --border: #d7ded2;
+            --line: #e6ece2;
+            --text: #1b1f22;
+            --text-soft: #5b666d;
+            --shadow: 0 18px 40px rgba(16, 24, 18, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(135, 188, 36, 0.15), transparent 22%),
+                linear-gradient(180deg, #edf1eb 0%, #f7f9f6 220px, var(--bg) 100%);
+            color: var(--text);
+            margin: 0;
+        }
+
+        .site-header {
+            background: linear-gradient(90deg, #171c20, #252d33);
+            color: #ffffff;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .site-header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .brand-mark {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-accent {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+            position: relative;
+        }
+
+        .brand-accent::before,
+        .brand-accent::after {
+            content: "";
+            position: absolute;
+            background: rgba(255,255,255,0.92);
+            border-radius: 999px;
+        }
+
+        .brand-accent::before {
+            width: 20px;
+            height: 5px;
+            top: 19px;
+            left: 12px;
+        }
+
+        .brand-accent::after {
+            width: 5px;
+            height: 20px;
+            top: 12px;
+            left: 19px;
+        }
+
+        .brand-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .brand-kicker {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .brand-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+
+        .brand-summary {
+            color: rgba(255,255,255,0.72);
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        .page-shell {
+            padding: 26px 24px 42px;
+        }
+
+        .hero {
+            max-width: 1400px;
+            margin: 0 auto 24px;
+            padding: 34px;
+            border-radius: 28px;
+            background:
+                linear-gradient(135deg, rgba(22, 27, 31, 0.97), rgba(32, 40, 45, 0.94)),
+                radial-gradient(circle at right, rgba(135, 188, 36, 0.18), transparent 35%);
+            color: #ffffff;
+            box-shadow: 0 24px 60px rgba(20, 25, 21, 0.16);
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.9fr);
+            gap: 26px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent 58%, rgba(135, 188, 36, 0.12) 100%);
+            pointer-events: none;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--primary);
+            margin-bottom: 14px;
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 28px;
+            height: 2px;
+            background: currentColor;
+        }
+
+        h1 {
+            margin: 0 0 14px;
+            font-size: clamp(2rem, 3vw, 3.15rem);
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+        }
+
+        .hero-copy {
+            max-width: 760px;
+            margin: 0;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.82);
+        }
+
+        .hero-highlights {
+            list-style: none;
+            padding: 0;
+            margin: 22px 0 0;
+            display: grid;
+            gap: 10px;
+        }
+
+        .hero-highlights li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .hero-highlights li::before {
+            content: "";
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 0 5px rgba(135, 188, 36, 0.16);
+            flex-shrink: 0;
+        }
+
+        .hero-stat-grid {
+            display: grid;
+            gap: 14px;
+            align-self: stretch;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 20px;
+            padding: 18px 18px 16px;
+            backdrop-filter: blur(8px);
+            min-height: 108px;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.62);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.85rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 8px;
+        }
+
+        .stat-caption {
+            color: rgba(255,255,255,0.72);
+            font-size: 0.92rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 22px;
+            border: 1px solid rgba(215, 222, 210, 0.95);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), rgba(135, 188, 36, 0));
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            padding-bottom: 16px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .section-kicker {
+            display: inline-block;
+            margin-bottom: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--primary-dark);
+        }
+
+        .card h2 {
+            margin: 0;
+            font-size: 1.42rem;
+            color: var(--text);
+            border: 0;
+            padding: 0;
+        }
+
+        .card-copy {
+            margin: 8px 0 0;
+            color: var(--text-soft);
+            line-height: 1.6;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 0.86rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+            border: 1px solid transparent;
+        }
+
+        .status-loading { background-color: #fff4d4; color: #8b5c00; border-color: #f2d690; }
+        .status-success { background-color: var(--primary-soft); color: #486e12; border-color: #c9dd9e; }
+        .status-error { background-color: #fde7e7; color: #a12e2e; border-color: #efc2c2; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-note {
+            margin: 0;
+            padding: 16px 18px;
+            background: var(--card-muted);
+            border: 1px dashed var(--border);
+            border-radius: 16px;
+            color: var(--text-soft);
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #3e474d;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background-color: #fff;
+            color: var(--text);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(135, 188, 36, 0.16);
+        }
+
+        select:disabled {
+            background-color: #eff3ed;
+            color: #809086;
+            cursor: not-allowed;
+        }
+
+        .btn {
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 12px 18px;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 700;
+            width: 100%;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+
+        .btn:hover {
+            filter: brightness(1.03);
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px rgba(109, 153, 29, 0.22);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(180deg, #30373c, #1f2529);
+            border-color: rgba(255,255,255,0.05);
+        }
+
+        .btn-success {
+            background: linear-gradient(180deg, #92c93f, #729f20);
+        }
+
+        .file-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .file-controls .btn {
+            width: auto;
+            min-width: 240px;
+        }
+
+        .comparison-selectors {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+            background: linear-gradient(180deg, #f7f9f6, #eef2eb);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid var(--line);
+        }
+
+        .selector-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+        }
+
+        .selector-box h3 {
+            margin: 0;
+            color: var(--text);
+            font-size: 1.05rem;
+        }
+
+        .selector-copy {
+            margin: 0 0 4px;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .table-shell {
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: auto;
+            background: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 0;
+            border-bottom: 1px solid var(--line);
+            padding: 14px 16px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f3f6f1;
+            color: #354047;
+            font-size: 0.82rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafcf9;
+        }
+
+        tbody tr:hover {
+            background: #f4f8ef;
+        }
+
+        .highlight-diff {
+            background: linear-gradient(90deg, rgba(135, 188, 36, 0.18), rgba(135, 188, 36, 0.08));
+            font-weight: bold;
+        }
+
+        .highlight-diff td:first-child {
+            color: #577b17;
+        }
+
+        .db-table-wrapper {
+            max-height: 400px;
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: #ffffff;
+        }
+
+        .link-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background-color: var(--primary-soft);
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-size: 18px;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(135, 188, 36, 0.2);
+        }
+
+        .link-icon:hover {
+            background-color: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(135, 188, 36, 0.3);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 960px) {
+            .site-header-inner,
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .brand-summary {
+                text-align: left;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 28px;
+            }
+
+            .comparison-selectors {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page-shell {
+                padding: 18px 14px 28px;
+            }
+
+            .site-header-inner {
+                padding: 14px;
+            }
+
+            .card,
+            .hero {
+                padding: 20px;
+                border-radius: 20px;
+            }
+
+            .file-controls .btn {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="site-header">
+    <div class="site-header-inner">
+        <div class="brand-mark">
+            <span class="brand-accent" aria-hidden="true"></span>
+            <div class="brand-copy">
+                <span class="brand-kicker">P+F inspired interface</span>
+                <span class="brand-title">Sensor Intelligence Workspace</span>
+            </div>
+        </div>
+        <div class="brand-summary">Clean industrial styling for database-driven sensor comparison and engineering review.</div>
+    </div>
+</div>
+
+<div class="page-shell">
+<section class="hero">
+    <div>
+        <div class="eyebrow">Automation-ready workflow</div>
+        <h1>Dynamic Sensor Database & Specification Comparator</h1>
+        <p class="hero-copy">This page now follows a Pepperl+Fuchs-inspired visual direction with dark industrial surfaces, bright green accents, precise cards, and a cleaner data-first layout.</p>
+        <ul class="hero-highlights">
+            <li>Auto-load or manually import your Excel-based sensor database</li>
+            <li>Compare two sensors side by side across every available specification</li>
+            <li>Extend the local dataset and export the updated workbook in one place</li>
+        </ul>
+    </div>
+    <div class="hero-stat-grid">
+        <div class="stat-card">
+            <span class="stat-label">Database file</span>
+            <strong class="stat-value">Sensor_Database.xlsx</strong>
+            <span class="stat-caption">Auto-detected on startup when present in the local folder.</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Models loaded</span>
+            <strong id="statModels" class="stat-value">0</strong>
+            <span class="stat-caption">Live count of entries currently available in memory.</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Brands / technologies</span>
+            <strong class="stat-value"><span id="statBrands">0</span> / <span id="statTechs">0</span></strong>
+            <span class="stat-caption">Distinct options available for filtering and comparison.</span>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+
+    <!-- File Status & Operations -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="section-kicker">Database operations</div>
+                <h2>Load, validate, and export sensor data</h2>
+                <p class="card-copy">Keep the page focused on workbook-driven data entry, fast refresh cycles, and easy local export.</p>
+            </div>
+        </div>
+        <div id="statusBadge" class="status-badge status-loading">⌛ Auto-loading 'Sensor_Database.xlsx'...</div>
+        
+        <div class="file-controls">
+            <input type="file" id="excelFile" accept=".xlsx, .xls" style="display: none;" onchange="importFromExcel(event)">
+            <button class="btn btn-secondary" onclick="document.getElementById('excelFile').click()">📂 Manual Load Excel File</button>
+            <button class="btn btn-success" onclick="exportToExcel()">💾 Download Excel Database</button>
+        </div>
+    </div>
+
+    <!-- Side-by-Side Comparison -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="section-kicker">Comparison</div>
+                <h2>Side-by-side specification review</h2>
+                <p class="card-copy">Select two records through guided filters and highlight every spec difference across the loaded columns.</p>
+            </div>
+        </div>
+        
+        <div class="comparison-selectors">
+            <!-- Selector Sensor A -->
+            <div class="selector-box">
+                <h3>Sensor A Selection</h3>
+                <p class="selector-copy">Build the first reference sensor from brand, size, technology, and model filters.</p>
+                <div>
+                    <label id="lblBrandA">1. Brand / Group</label>
+                    <select id="brandA" onchange="onBrandChange('A')">
+                        <option value="">-- Waiting for DB --</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="lblSizeA">2. Size Category</label>
+                    <select id="sizeA" disabled onchange="onSizeChange('A')">
+                        <option value="">-- Select Category --</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="lblTechA">3. Technology</label>
+                    <select id="techA" disabled onchange="onTechChange('A')">
+                        <option value="">-- Select Technology --</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="lblModelA">4. Model / Series</label>
+                    <select id="modelA" disabled onchange="renderComparison()">
+                        <option value="">-- Select Model --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Selector Sensor B -->
+            <div class="selector-box">
+                <h3>Sensor B Selection</h3>
+                <p class="selector-copy">Choose the second candidate to compare product-level differences in a consistent grid.</p>
+                <div>
+                    <label id="lblBrandB">1. Brand / Group</label>
+                    <select id="brandB" onchange="onBrandChange('B')">
+                        <option value="">-- Waiting for DB --</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="lblSizeB">2. Size Category</label>
+                    <select id="sizeB" disabled onchange="onSizeChange('B')">
+                        <option value="">-- Select Category --</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="lblTechB">3. Technology</label>
+                    <select id="techB" disabled onchange="onTechChange('B')">
+                        <option value="">-- Select Technology --</option>
+                    </select>
+                </div>
+                <div>
+                    <label id="lblModelB">4. Model / Series</label>
+                    <select id="modelB" disabled onchange="renderComparison()">
+                        <option value="">-- Select Model --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Output Table -->
+        <div class="table-shell">
+            <table id="comparisonTable">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Parameter</th>
+                        <th id="headerA" style="width: 37.5%;">Sensor A</th>
+                        <th id="headerB" style="width: 37.5%;">Sensor B</th>
+                    </tr>
+                </thead>
+                <tbody id="comparisonBody">
+                    <tr><td colspan="3" style="text-align:center;">Loading sensor data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Raw Data Table View -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="section-kicker">Database view</div>
+                <h2>Stored sensors database (<span id="sensorCount">0</span>)</h2>
+                <p class="card-copy">Review the raw workbook content in a cleaner engineering table with improved spacing and readability.</p>
+            </div>
+        </div>
+        <div class="db-table-wrapper">
+            <table id="dbTable">
+                <thead id="dbTableHeader">
+                    <tr><th>No Data Loaded</th></tr>
+                </thead>
+                <tbody id="dbTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Dynamic Input Form -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="section-kicker">Data entry</div>
+                <h2>Add new sensor entry</h2>
+                <p class="card-copy">Form fields are generated directly from the imported workbook columns so the local schema stays aligned.</p>
+            </div>
+        </div>
+        <form id="sensorForm" onsubmit="addSensor(event)">
+            <div class="form-grid" id="dynamicFormGrid">
+                <p class="form-note">Form fields will generate automatically based on loaded Excel parameters.</p>
+            </div>
+            <button type="submit" id="btnAddSensor" class="btn" style="margin-top: 15px;" disabled>Add Sensor to Local Database</button>
+        </form>
+    </div>
+</div>
+</div>
+
+<script>
+    // Configuration: Local Excel file target name
+    const DEFAULT_EXCEL_FILENAME = 'Sensor_Database.xlsx';
+
+    // Global State
+    let sensorDB = [];
+    let dynamicColumns = [];
+
+    let colBrand = "";
+    let colSize = "";
+    let colTech = "";
+    let colModel = "";
+
+    // Auto-run on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        autoLoadDefaultExcel();
+    });
+
+    // Auto-load Excel from local folder
+    async function autoLoadDefaultExcel() {
+        const badge = document.getElementById('statusBadge');
+        try {
+            const response = await fetch(DEFAULT_EXCEL_FILENAME);
+            if (!response.ok) throw new Error("File not found or access blocked.");
+            
+            const arrayBuffer = await response.arrayBuffer();
+            parseExcelData(arrayBuffer);
+            
+            badge.className = "status-badge status-success";
+            badge.innerText = `✅ Auto-loaded '${DEFAULT_EXCEL_FILENAME}' successfully!`;
+        } catch (err) {
+            console.warn("Auto-load failed:", err);
+            badge.className = "status-badge status-error";
+            badge.innerText = `⚠️ Could not auto-load '${DEFAULT_EXCEL_FILENAME}'. Please use 'Manual Load'.`;
+            
+            document.getElementById('comparisonBody').innerHTML = 
+                '<tr><td colspan="3" style="text-align:center;">Please upload an Excel database file manually.</td></tr>';
+        }
+    }
+
+    // Process raw ArrayBuffer into Application state
+    function parseExcelData(arrayBuffer) {
+        const data = new Uint8Array(arrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "-" });
+
+        if (jsonData.length === 0) {
+            alert("The selected Excel file contains no data.");
+            return;
+        }
+
+        dynamicColumns = Object.keys(jsonData[0]);
+
+        colBrand = dynamicColumns[0] || "";
+        colSize  = dynamicColumns[2] || dynamicColumns[1] || "";
+        colTech  = dynamicColumns[5] || dynamicColumns[2] || "";
+        colModel = dynamicColumns[3] || dynamicColumns[0] || "";
+
+        sensorDB = jsonData.map((row, index) => ({
+            _id: Date.now() + index,
+            ...row
+        }));
+
+        updateUI();
+    }
+
+    // Manual upload fallback
+    function importFromExcel(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            parseExcelData(evt.target.result);
+            const badge = document.getElementById('statusBadge');
+            badge.className = "status-badge status-success";
+            badge.innerText = `✅ Loaded manually: ${file.name}`;
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // Refresh application UI
+    function updateUI() {
+        document.getElementById('sensorCount').innerText = sensorDB.length;
+        updateOverviewMetrics();
+        
+        updateSelectorLabels();
+        buildDynamicForm();
+        updateDBTable();
+        initBrandDropdowns();
+        renderComparison();
+    }
+
+    function updateOverviewMetrics() {
+        const brandCount = colBrand ? new Set(sensorDB.map(s => s[colBrand]).filter(Boolean)).size : 0;
+        const techCount = colTech ? new Set(sensorDB.map(s => s[colTech]).filter(Boolean)).size : 0;
+
+        document.getElementById('statModels').innerText = sensorDB.length;
+        document.getElementById('statBrands').innerText = brandCount;
+        document.getElementById('statTechs').innerText = techCount;
+    }
+
+    function updateSelectorLabels() {
+        if (!dynamicColumns.length) return;
+
+        ['A', 'B'].forEach(side => {
+            document.getElementById(`lblBrand${side}`).innerText = `1. ${colBrand}`;
+            document.getElementById(`lblSize${side}`).innerText = `2. ${colSize}`;
+            document.getElementById(`lblTech${side}`).innerText = `3. ${colTech}`;
+            document.getElementById(`lblModel${side}`).innerText = `4. ${colModel}`;
+        });
+    }
+
+    function buildDynamicForm() {
+        const grid = document.getElementById('dynamicFormGrid');
+        grid.innerHTML = '';
+
+        if (dynamicColumns.length === 0) return;
+
+        dynamicColumns.forEach(col => {
+            const group = document.createElement('div');
+            group.className = 'form-group';
+            group.innerHTML = `
+                <label>${col}</label>
+                <input type="text" data-col="${col}" placeholder="Enter ${col}">
+            `;
+            grid.appendChild(group);
+        });
+
+        document.getElementById('btnAddSensor').disabled = false;
+    }
+
+    function isProductLinkColumn(colName) {
+        return colName.toLowerCase().includes('link') || colName.toLowerCase().includes('url') || colName.toLowerCase().includes('website');
+    }
+
+    function renderLinkCell(value) {
+        if (!value || value === '-') return '-';
+        const isUrl = value.toString().startsWith('http');
+        if (!isUrl) return value;
+        
+        const span = document.createElement('span');
+        const link = document.createElement('a');
+        link.href = value;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.className = 'link-icon';
+        link.title = `Visit: ${value}`;
+        link.innerHTML = '🔗';
+        span.appendChild(link);
+        return span;
+    }
+
+    function updateDBTable() {
+        const thead = document.getElementById('dbTableHeader');
+        const tbody = document.getElementById('dbTableBody');
+        
+        thead.innerHTML = '';
+        tbody.innerHTML = '';
+
+        if (dynamicColumns.length === 0) {
+            thead.innerHTML = '<tr><th>No Data Loaded</th></tr>';
+            return;
+        }
+
+        const headerTr = document.createElement('tr');
+        dynamicColumns.forEach(col => {
+            const th = document.createElement('th');
+            th.innerText = col;
+            headerTr.appendChild(th);
+        });
+        thead.appendChild(headerTr);
+
+        sensorDB.forEach(s => {
+            const tr = document.createElement('tr');
+            dynamicColumns.forEach(col => {
+                const td = document.createElement('td');
+                const value = s[col] !== undefined ? s[col] : '-';
+                
+                if (isProductLinkColumn(col)) {
+                    td.appendChild(renderLinkCell(value));
+                } else {
+                    td.innerText = value;
+                }
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+    }
+
+    function initBrandDropdowns() {
+        ['A', 'B'].forEach(side => {
+            const brandSelect = document.getElementById(`brand${side}`);
+            const brands = [...new Set(sensorDB.map(s => s[colBrand]))].filter(Boolean).sort();
+
+            brandSelect.innerHTML = `<option value="">-- Select ${colBrand} --</option>`;
+            brands.forEach(b => {
+                const opt = document.createElement('option');
+                opt.value = b;
+                opt.innerText = b;
+                brandSelect.appendChild(opt);
+            });
+        });
+    }
+
+    function onBrandChange(side) {
+        const brandVal = document.getElementById(`brand${side}`).value;
+        const sizeSelect = document.getElementById(`size${side}`);
+        const techSelect = document.getElementById(`tech${side}`);
+        const modelSelect = document.getElementById(`model${side}`);
+
+        sizeSelect.innerHTML = `<option value="">-- Select ${colSize} --</option>`;
+        techSelect.innerHTML = `<option value="">-- Select ${colTech} --</option>`;
+        modelSelect.innerHTML = `<option value="">-- Select ${colModel} --</option>`;
+
+        techSelect.disabled = true;
+        modelSelect.disabled = true;
+
+        if (!brandVal) {
+            sizeSelect.disabled = true;
+            renderComparison();
+            return;
+        }
+
+        const filtered = sensorDB.filter(s => s[colBrand] === brandVal);
+        const sizes = [...new Set(filtered.map(s => s[colSize]))].filter(Boolean).sort();
+
+        sizes.forEach(sz => {
+            const opt = document.createElement('option');
+            opt.value = sz;
+            opt.innerText = sz;
+            sizeSelect.appendChild(opt);
+        });
+
+        sizeSelect.disabled = false;
+        renderComparison();
+    }
+
+    function onSizeChange(side) {
+        const brandVal = document.getElementById(`brand${side}`).value;
+        const sizeVal = document.getElementById(`size${side}`).value;
+        const techSelect = document.getElementById(`tech${side}`);
+        const modelSelect = document.getElementById(`model${side}`);
+
+        techSelect.innerHTML = `<option value="">-- Select ${colTech} --</option>`;
+        modelSelect.innerHTML = `<option value="">-- Select ${colModel} --</option>`;
+        modelSelect.disabled = true;
+
+        if (!sizeVal) {
+            techSelect.disabled = true;
+            renderComparison();
+            return;
+        }
+
+        const filtered = sensorDB.filter(s => s[colBrand] === brandVal && s[colSize] === sizeVal);
+        const techs = [...new Set(filtered.map(s => s[colTech]))].filter(Boolean).sort();
+
+        techs.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t;
+            opt.innerText = t;
+            techSelect.appendChild(opt);
+        });
+
+        techSelect.disabled = false;
+        renderComparison();
+    }
+
+    function onTechChange(side) {
+        const brandVal = document.getElementById(`brand${side}`).value;
+        const sizeVal = document.getElementById(`size${side}`).value;
+        const techVal = document.getElementById(`tech${side}`).value;
+        const modelSelect = document.getElementById(`model${side}`);
+
+        modelSelect.innerHTML = `<option value="">-- Select ${colModel} --</option>`;
+
+        if (!techVal) {
+            modelSelect.disabled = true;
+            renderComparison();
+            return;
+        }
+
+        const filtered = sensorDB.filter(s => 
+            s[colBrand] === brandVal && 
+            s[colSize] === sizeVal && 
+            s[colTech] === techVal
+        );
+
+        filtered.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s._id;
+            opt.innerText = s[colModel] || "Model Entry";
+            modelSelect.appendChild(opt);
+        });
+
+        modelSelect.disabled = false;
+        renderComparison();
+    }
+
+    function renderComparison() {
+        const idA = document.getElementById('modelA').value;
+        const idB = document.getElementById('modelB').value;
+
+        const sensorA = sensorDB.find(s => s._id == idA);
+        const sensorB = sensorDB.find(s => s._id == idB);
+
+        const tbody = document.getElementById('comparisonBody');
+        tbody.innerHTML = '';
+
+        document.getElementById('headerA').innerText = sensorA ? `${sensorA[colBrand]} - ${sensorA[colModel]}` : 'Sensor A';
+        document.getElementById('headerB').innerText = sensorB ? `${sensorB[colBrand]} - ${sensorB[colModel]}` : 'Sensor B';
+
+        if (!sensorA && !sensorB) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Select sensors above to compare specifications side-by-side.</td></tr>';
+            return;
+        }
+
+        dynamicColumns.forEach(columnTitle => {
+            const valA = sensorA ? (sensorA[columnTitle] !== undefined ? sensorA[columnTitle] : '-') : '-';
+            const valB = sensorB ? (sensorB[columnTitle] !== undefined ? sensorB[columnTitle] : '-') : '-';
+            
+            const isDifferent = sensorA && sensorB && valA.toString().toLowerCase() !== valB.toString().toLowerCase();
+
+            const tr = document.createElement('tr');
+            if (isDifferent) tr.classList.add('highlight-diff');
+
+            const paramTd = document.createElement('td');
+            paramTd.innerHTML = `<strong>${columnTitle}</strong>`;
+            tr.appendChild(paramTd);
+
+            // Cell A
+            const cellA = document.createElement('td');
+            if (isProductLinkColumn(columnTitle)) {
+                cellA.appendChild(renderLinkCell(valA));
+            } else {
+                cellA.innerText = valA;
+            }
+            tr.appendChild(cellA);
+
+            // Cell B
+            const cellB = document.createElement('td');
+            if (isProductLinkColumn(columnTitle)) {
+                cellB.appendChild(renderLinkCell(valB));
+            } else {
+                cellB.innerText = valB;
+            }
+            tr.appendChild(cellB);
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    function addSensor(e) {
+        e.preventDefault();
+        const inputs = document.querySelectorAll('#dynamicFormGrid input');
+        
+        const newSensor = { _id: Date.now() };
+        inputs.forEach(input => {
+            const col = input.getAttribute('data-col');
+            newSensor[col] = input.value.trim() || '-';
+        });
+
+        sensorDB.push(newSensor);
+        document.getElementById('sensorForm').reset();
+        updateUI();
+    }
+
+    function exportToExcel() {
+        if (sensorDB.length === 0) {
+            alert('Database is empty! Load or enter data first.');
+            return;
+        }
+
+        const exportData = sensorDB.map(sensor => {
+            const cleanObj = {};
+            dynamicColumns.forEach(col => {
+                cleanObj[col] = sensor[col] !== undefined ? sensor[col] : '-';
+            });
+            return cleanObj;
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sensors");
+
+        XLSX.writeFile(workbook, DEFAULT_EXCEL_FILENAME);
+    }
+</script>
+
+</body>
+</html>
